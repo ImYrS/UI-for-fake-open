@@ -1,0 +1,193 @@
+<!--
+=========================================================
+* Corporate UI - v1.0.0
+=========================================================
+
+* Product Page: https://www.creative-tim.com/product/corporate-ui
+* Copyright 2022 Creative Tim (https://www.creative-tim.com)
+* Licensed under MIT (https://www.creative-tim.com/license)
+* Coded by Creative Tim
+
+=========================================================
+
+* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+-->
+<!DOCTYPE html>
+<html lang="zh-cn">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <title>ChatGPT Auth</title>
+    <!--     Fonts and icons     -->
+    <link
+      href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700|Noto+Sans:300,400,500,600,700,800|PT+Mono:300,400,500,600,700"
+      rel="stylesheet"
+    />
+    <!-- CSS Files -->
+    <link
+      id="pagestyle"
+      href="/assets/css/corporate-ui-dashboard.css?v=1.0.0"
+      rel="stylesheet"
+    />
+  </head>
+
+  <body class="">
+    <main class="main-content mt-0">
+      <section>
+        <div class="page-header min-vh-100">
+          <div class="container">
+            <div class="row">
+              <div class="col-xl-4 col-md-6 d-flex flex-column mx-auto">
+                <div class="card card-plain mt-8">
+                  <div class="card-header pb-0 text-left bg-transparent">
+                    <h3 class="font-weight-black text-dark display-6">欢迎</h3>
+                    <p class="mb-0">
+                      本服务旨在帮助 ChatGPT 被拒用户绕过 OpenAI 获取 Access
+                      Token. 支持 Google / Microsoft 等第三方登录.
+                    </p>
+                  </div>
+                  <div class="card-body">
+                    <div id="stepOne">
+                      <button
+                        class="btn btn-dark w-100 mt-4 mb-3"
+                        id="getLoginUrl"
+                        onclick="getLoginUrl()"
+                      >
+                        立即开始
+                      </button>
+                    </div>
+                    <div id="stepTwo" style="display: none">
+                      <h4 class="mb-3">请认真阅读说明后继续</h4>
+                      <ol>
+                        <li>
+                          你需要在下面的链接中登录你的 OpenAI 账号,
+                          支持第三方登录.
+                        </li>
+                        <li>登陆后, 浏览器 <b>可能会报错</b>, 无需理会.</li>
+                        <li>
+                          将登陆成功后地址栏中的链接完整的复制并填入下方输入框内.
+                        </li>
+                        <li>最后, 点击确认提交, 获取 Access Token.</li>
+                        <li>如果提示 login expired 等错误, 可以刷新重试.</li>
+                      </ol>
+                      <a
+                        class="btn btn-dark w-100 mb-3"
+                        id="loginUrl"
+                        target="_blank"
+                        href="#"
+                        >点这里去登陆</a
+                      >
+                      <textarea
+                        class="form-control"
+                        id="callbackUrl"
+                        rows="6"
+                        placeholder="登录成功后的页面链接, 类似: https://explorer.api.openai.com/api/auth/callback/auth0?XXXXXXX"
+                      ></textarea>
+                      <button
+                        class="btn btn-primary w-100 mt-4 mb-3"
+                        id="getAccessToken"
+                        onclick="getAccessToken()"
+                      >
+                        确认提交
+                      </button>
+                    </div>
+                  </div>
+                  <div id="stepThree" style="display: none">
+                    <h4 class="mb-3 text-success">Access Token</h4>
+                    <textarea
+                      class="form-control mb-3"
+                      id="accessToken"
+                      rows="10"
+                      readonly
+                    ></textarea>
+                    <h5 class="mb-3">完整数据</h5>
+                    <pre id="fullData"></pre>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div
+                  class="position-absolute w-40 top-0 end-0 h-100 d-md-block d-none"
+                >
+                  <div
+                    class="oblique-image position-absolute fixed-top ms-auto h-100 z-index-0 bg-cover ms-n8"
+                    style="
+                      background-image: url('/assets/img/image-sign-in.jpg');
+                    "
+                  >
+                    <div
+                      class="blur mt-12 p-4 text-center border border-white border-radius-md position-absolute fixed-bottom m-4"
+                    >
+                      <h2 class="mt-3 text-dark font-weight-bold">
+                        OpenAI, not CloseAI.
+                      </h2>
+                      <h6 class="text-dark text-sm mt-4">
+                        Core by FakeOpen. Theme by @ImYrS.
+                      </h6>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+    <!--   Core JS Files   -->
+    <script src="/assets/js/jquery.min.js"></script>
+    <script>
+      const endpoint = "http://127.0.0.1:5000";
+      let state = "";
+
+      const getLoginUrl = () => {
+        $("#getLoginUrl").text("正在获取登录链接...").attr("disabled", true);
+
+        $.ajax({
+          url: `${endpoint}/auth/endpoint`,
+          method: "GET",
+          contentType: "application/json;charset=UTF-8",
+          success: (data) => {
+            $("#loginUrl").attr("href", data.url);
+            state = data.state;
+            $("#callbackUrl").val("");
+            $("#stepOne").slideUp();
+            $("#stepTwo").slideDown();
+          },
+          error: (err) => {
+            $("#getLoginUrl").text("立即开始").attr("disabled", false);
+            alert("获取登录链接失败，请稍后重试");
+          },
+        });
+      };
+
+      const getAccessToken = () => {
+        $("#getAccessToken")
+          .text("正在获取 Access Token...")
+          .attr("disabled", true);
+
+        $.ajax({
+          url: `${endpoint}/auth/token`,
+          method: "POST",
+          data: {
+            state: state,
+            callbackUrl: $("#callbackUrl").val(),
+          },
+          contentType: "application/x-www-form-urlencoded",
+          success: (data) => {
+            $("#accessToken").text(data.accessToken);
+            $("#fullData").text(JSON.stringify(data, null, 2));
+            $("#stepTwo").slideUp();
+            $("#stepThree").slideDown();
+          },
+          error: (err) => {
+            $("#getAccessToken").text("确认提交").attr("disabled", false);
+            alert(`获取失败: ${err.responseJSON.detail}`);
+          },
+        });
+      };
+    </script>
+  </body>
+</html>
