@@ -95,7 +95,7 @@
                       </button>
                     </div>
                   </div>
-                  <div id="stepThree">
+                  <div id="stepThree" style="display: none">
                     <h4 class="mb-3 text-success">Access Token</h4>
                     <textarea
                       class="form-control clipboard"
@@ -104,7 +104,7 @@
                       rows="5"
                       readonly
                     ></textarea>
-                    <span class="text-xs text-mute">点击即可复制</span>
+                    <span class="text-xs text-mute" id="clipboardResult">点击即可复制</span>
                     <h5 class="mb-3 mt-3">完整数据</h5>
                     <pre id="fullData"></pre>
                   </div>
@@ -147,10 +147,10 @@
           window.clipboard = new ClipboardJS(".clipboard");
           clipboard.on("success", (e) => {
             e.clearSelection();
-            alert("复制成功");
+            $('#clipboardResult').text('复制成功').addClass('text-success').removeClass('text-mute');
           });
           clipboard.on("error", (e) => {
-            alert("复制失败");
+            $('#clipboardResult').text('复制失败').addClass('text-danger').removeClass('text-mute');
           });
         }
       };
