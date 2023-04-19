@@ -95,15 +95,17 @@
                       </button>
                     </div>
                   </div>
-                  <div id="stepThree" style="display: none">
+                  <div id="stepThree">
                     <h4 class="mb-3 text-success">Access Token</h4>
                     <textarea
-                      class="form-control mb-3"
+                      class="form-control clipboard"
+                      data-clipboard-target="#accessToken"
                       id="accessToken"
-                      rows="10"
+                      rows="5"
                       readonly
                     ></textarea>
-                    <h5 class="mb-3">完整数据</h5>
+                    <span class="text-xs text-mute">点击即可复制</span>
+                    <h5 class="mb-3 mt-3">完整数据</h5>
                     <pre id="fullData"></pre>
                   </div>
                 </div>
@@ -138,6 +140,21 @@
     </main>
     <!--   Core JS Files   -->
     <script src="/assets/js/jquery.min.js"></script>
+    <script src="/assets/js/clipboard.min.js"></script>
+    <script>
+      document.onreadystatechange = () => {
+        if (document.readyState === "complete") {
+          window.clipboard = new ClipboardJS(".clipboard");
+          clipboard.on("success", (e) => {
+            e.clearSelection();
+            alert("复制成功");
+          });
+          clipboard.on("error", (e) => {
+            alert("复制失败");
+          });
+        }
+      };
+    </script>
     <script>
       const endpoint = "http://127.0.0.1:5000";
       let state = "";
